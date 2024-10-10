@@ -8,11 +8,11 @@ import java.util.Map;
 
 public interface HistoryDataClient {
 
-    @Headers("Content-type:")
-    @RequestLine("")
+    @Headers({"Content-type: application/json", "Accept: application/json"})
+    @RequestLine("POST /cj")
     Map<String, String> getTradingData(RequestBean requestBean);
 
-    @Headers("")
-    @RequestLine("")
+    @Headers({"Content-type: application/json", "Accept: application/json"})
+    @RequestLine("POST /bj")
     Map<String, String> getBidData(RequestBean requestBean);
 }
