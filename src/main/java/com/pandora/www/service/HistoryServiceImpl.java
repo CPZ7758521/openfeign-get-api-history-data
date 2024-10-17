@@ -16,7 +16,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class HistoryServiceImpl implements HistoryService{
-    private HistoryDataClient historyDataClient = FeignClientFactory.getHistoryDataClient(Config.dataUrl);
+    private final HistoryDataClient historyDataClient = FeignClientFactory.getHistoryDataClient(Config.dataUrl);
     @Override
     public void saveTradingData(String startDay, String endDay) throws Exception {
         FileUtils.deleteFile(Constant.ODS_INDUSTRY_CJ_RT);
