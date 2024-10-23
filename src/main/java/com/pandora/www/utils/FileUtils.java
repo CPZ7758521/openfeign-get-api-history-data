@@ -4,12 +4,16 @@ import com.pandora.www.config.Config;
 import com.pandora.www.constant.Constant;
 import org.apache.commons.io.IOUtils;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.security.UserGroupInformation;
 
 import java.io.*;
+import java.lang.reflect.Field;
+import java.net.URI;
 import java.net.URL;
+import java.util.Objects;
 
 public class FileUtils {
     private static Configuration conf;
@@ -194,4 +198,47 @@ public class FileUtils {
         }
     }
 
+
+    //通过反射，泛型将一个bean转换成 CSV 字符串
+    public static <T> String toCsvString(T t) throws IllegalAccessException {
+        String str = "";
+        Field[] fields = t.getClass().getDeclaredFields();
+
+        for (int i = 0; i < fields.length; i++) {
+            Field field = fields[i];
+            field.setAccessible(true);
+
+            Object objValue = field.get(t);
+            String value = Objects.nonNull(objValue) ? "" : String.valueOf(objValue);
+
+            value.replaceAll("\n", "");
+            value.replaceAll("\r", "");
+            value.replaceAll(",", "，");
+            if (i == fields.length - 1) {
+                str += value;
+            } else {
+                str += value + ",";
+            }
+        }
+        return str;
+    }
+
+    //通过IO copy下载hdfs文件
+    public static void ioDownloadHdfs() throws IOException {
+        String file = "hdfs://10.32.32.12:8192/user/log/data.csv";
+        FileSystem hdfs = FileSystem.get(URI.create(file), conf);
+        FSDataInputStream inputStream = hdfs.open(new Path(file));
+
+        FileOutputStream fileOutputStream = new FileOutputStream(new File("/localdata/log/data.csv"));
+        IOUtils.copy(inputStream, fileOutputStream);
+
+        inputStream.close();
+        fileOutputStream.close();
+    }
+
+    //通过hdfs copy下载hdfs文件
+    public static void downloadHdfs() throws IOException {
+        FileSystem hdfs = FileSystem.get(conf);
+        hdfs.copyToLocalFile(new Path("hdfs://10.32.32.12:8192/user/log/data.csv"), new Path("/localdata/log/data.csv"));
+    }
 }
